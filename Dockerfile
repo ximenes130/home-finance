@@ -32,7 +32,7 @@ ENV RAILS_ENV="production" \
 
 LABEL \
   io.hass.version="0.1.0" \
-  io.hass.type="app" \
+  io.hass.type="addon" \
   io.hass.arch="aarch64|amd64|armhf|armv7"
 
 # Throw-away build stage to reduce size of final image
