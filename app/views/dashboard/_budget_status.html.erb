@@ -1,0 +1,38 @@
+<div class="bg-white rounded-lg border border-slate-200 p-4 sm:p-6">
+  <h2 class="text-sm font-medium text-slate-500 uppercase tracking-wide">Budget Status</h2>
+
+  <% if @budgets.any? %>
+    <ul class="mt-3 space-y-3">
+      <% @budgets.each do |budget| %>
+        <li>
+          <div class="flex items-center justify-between text-sm">
+            <span class="font-medium text-slate-700"><%= budget.category.name %></span>
+            <span class="tabular-nums text-slate-500"><%= format_currency(budget.spent) %> / <%= format_currency(budget.amount_limit) %></span>
+          </div>
+          <% actual_percent = budget.amount_limit > 0 ? (budget.spent / budget.amount_limit * 100) : 0 %>
+          <% bar_width = [actual_percent, 100].min %>
+          <% bar_color = if budget.over_budget?
+                           "bg-red-500"
+                         elsif actual_percent >= 80
+                           "bg-amber-500"
+                         else
+                           "bg-emerald-500"
+                         end %>
+          <div class="mt-1.5 h-2 rounded-full bg-slate-100 overflow-hidden"
+               role="progressbar"
+               aria-valuenow="<%= actual_percent.round %>"
+               aria-valuemin="0"
+               aria-valuemax="100"
+               aria-label="<%= budget.category.name %> budget: <%= actual_percent.round %>% used">
+            <div class="h-full rounded-full <%= bar_color %>" style="width: <%= bar_width %>%"></div>
+          </div>
+          <p class="mt-0.5 text-xs tabular-nums <%= budget.over_budget? ? 'text-red-600 font-medium' : 'text-slate-500' %>">
+            <%= actual_percent.round %>% used
+          </p>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <p class="mt-3 text-sm text-slate-500">All budgets on track this month.</p>
+  <% end %>
+</div>

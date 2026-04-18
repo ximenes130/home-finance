@@ -1,0 +1,64 @@
+<% start_date = params[:start_date].presence || Date.current.beginning_of_month.iso8601 %>
+<% end_date = params[:end_date].presence || Date.current.end_of_month.iso8601 %>
+
+<div class="bg-white rounded-lg border border-slate-200 p-4" data-controller="filter">
+  <%= form_with url: transactions_path, method: :get, data: { turbo_frame: "transactions", filter_target: "form" },
+      class: "flex flex-wrap items-end gap-3" do %>
+    <div>
+      <label for="start_date" class="block text-xs font-medium text-slate-500">From</label>
+      <input type="date" name="start_date" id="start_date" value="<%= start_date %>"
+             data-action="change->filter#submit"
+             class="mt-1 rounded-md border-slate-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+    </div>
+    <div>
+      <label for="end_date" class="block text-xs font-medium text-slate-500">To</label>
+      <input type="date" name="end_date" id="end_date" value="<%= end_date %>"
+             data-action="change->filter#submit"
+             class="mt-1 rounded-md border-slate-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+    </div>
+    <div>
+      <label for="account_id" class="block text-xs font-medium text-slate-500">Account</label>
+      <select name="account_id" id="account_id"
+              data-action="change->filter#submit"
+              class="mt-1 rounded-md border-slate-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+        <option value="">All accounts</option>
+        <% @accounts.each do |account| %>
+          <option value="<%= account.id %>" <%= "selected" if params[:account_id] == account.id.to_s %>><%= account.name %></option>
+        <% end %>
+      </select>
+    </div>
+    <div>
+      <label for="category_id" class="block text-xs font-medium text-slate-500">Category</label>
+      <select name="category_id" id="category_id"
+              data-action="change->filter#submit"
+              class="mt-1 rounded-md border-slate-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+        <option value="">All categories</option>
+        <% @categories.group_by(&:kind).each do |kind, categories| %>
+          <optgroup label="<%= kind.humanize %>">
+            <% categories.each do |category| %>
+              <option value="<%= category.id %>" <%= "selected" if params[:category_id] == category.id.to_s %>><%= category.name %></option>
+            <% end %>
+          </optgroup>
+        <% end %>
+      </select>
+    </div>
+    <div>
+      <label for="kind" class="block text-xs font-medium text-slate-500">Kind</label>
+      <select name="kind" id="kind"
+              data-action="change->filter#submit"
+              class="mt-1 rounded-md border-slate-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+        <option value="">All</option>
+        <option value="income" <%= "selected" if params[:kind] == "income" %>>Income</option>
+        <option value="expense" <%= "selected" if params[:kind] == "expense" %>>Expense</option>
+        <option value="transfer" <%= "selected" if params[:kind] == "transfer" %>>Transfer</option>
+      </select>
+    </div>
+    <div class="flex items-center gap-2">
+      <button type="submit"
+              class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700">
+        Apply
+      </button>
+      <%= link_to "Clear", transactions_path, class: "text-sm text-slate-500 hover:text-slate-700" %>
+    </div>
+  <% end %>
+</div>

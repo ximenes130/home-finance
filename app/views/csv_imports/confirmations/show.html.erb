@@ -1,0 +1,109 @@
+<%= render "csv_imports/step_indicator", step: 3 %>
+
+<h1 class="text-lg font-semibold text-slate-900 mb-6">Import Transactions from CSV</h1>
+
+<div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
+  <div class="bg-white rounded-lg border border-slate-200 p-4">
+    <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Total Rows</p>
+    <p class="mt-1 text-2xl font-semibold tabular-nums text-slate-900"><%= @total_rows %></p>
+  </div>
+  <div class="bg-white rounded-lg border border-slate-200 p-4">
+    <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">New</p>
+    <p class="mt-1 text-2xl font-semibold tabular-nums text-emerald-600"><%= @new_count %></p>
+  </div>
+  <div class="bg-white rounded-lg border border-slate-200 p-4">
+    <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Duplicates</p>
+    <p class="mt-1 text-2xl font-semibold tabular-nums text-amber-600"><%= @duplicate_count %></p>
+  </div>
+</div>
+
+<%= form_with url: csv_import_confirmation_path(@csv_import), method: :post, data: { controller: "import-review" } do |f| %>
+  <% if @duplicate_count > 0 %>
+    <div class="mb-4 rounded-md bg-amber-50 border border-amber-200 p-4">
+      <p class="text-sm text-amber-800">
+        <strong><%= @duplicate_count %> potential duplicate<%= @duplicate_count == 1 ? "" : "s" %></strong> detected.
+        Duplicates are excluded by default. Check rows you want to import anyway.
+      </p>
+    </div>
+  <% end %>
+
+  <div class="bg-white rounded-lg border border-slate-200 overflow-hidden mb-6">
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-slate-200 text-sm">
+        <thead class="bg-slate-50">
+          <tr>
+            <th class="px-3 py-2 text-left text-xs font-medium text-slate-500 uppercase tracking-wide w-10">
+              <input type="checkbox" data-import-review-target="selectAll" data-action="change->import-review#toggleAll"
+                     class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                     checked>
+            </th>
+            <% if @mapping["transaction_date"] %>
+              <th class="px-3 py-2 text-left text-xs font-medium text-slate-500 uppercase tracking-wide">Date</th>
+            <% end %>
+            <% if @mapping["amount"] %>
+              <th class="px-3 py-2 text-right text-xs font-medium text-slate-500 uppercase tracking-wide">Amount</th>
+            <% end %>
+            <% if @mapping["category"] %>
+              <th class="px-3 py-2 text-left text-xs font-medium text-slate-500 uppercase tracking-wide">Category</th>
+            <% end %>
+            <% if @mapping["note"] %>
+              <th class="px-3 py-2 text-left text-xs font-medium text-slate-500 uppercase tracking-wide">Note</th>
+            <% end %>
+            <th class="px-3 py-2 text-left text-xs font-medium text-slate-500 uppercase tracking-wide">Status</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          <% @all_rows.each_with_index do |row, index| %>
+            <% is_duplicate = @duplicates[index] %>
+            <tr class="<%= 'bg-amber-50 border-l-4 border-amber-400' if is_duplicate %>">
+              <td class="px-3 py-2">
+                <input type="checkbox" name="selected_rows[]" value="<%= index %>"
+                       data-import-review-target="rowCheckbox" data-action="change->import-review#updateCount"
+                       class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                       <%= "checked" unless is_duplicate %>>
+              </td>
+              <% if @mapping["transaction_date"] %>
+                <td class="px-3 py-2 text-sm text-slate-700 whitespace-nowrap">
+                  <%= row[@headers.index(@mapping["transaction_date"])] if @headers.index(@mapping["transaction_date"]) %>
+                </td>
+              <% end %>
+              <% if @mapping["amount"] %>
+                <td class="px-3 py-2 text-sm font-medium tabular-nums text-right text-slate-900">
+                  <%= row[@headers.index(@mapping["amount"])] if @headers.index(@mapping["amount"]) %>
+                </td>
+              <% end %>
+              <% if @mapping["category"] %>
+                <td class="px-3 py-2 text-sm text-slate-700">
+                  <%= row[@headers.index(@mapping["category"])] if @headers.index(@mapping["category"]) %>
+                </td>
+              <% end %>
+              <% if @mapping["note"] %>
+                <td class="px-3 py-2 text-sm text-slate-700">
+                  <%= row[@headers.index(@mapping["note"])] if @headers.index(@mapping["note"]) %>
+                </td>
+              <% end %>
+              <td class="px-3 py-2">
+                <% if is_duplicate %>
+                  <span class="inline-flex items-center rounded-full bg-amber-50 text-amber-700 px-2.5 py-0.5 text-xs font-medium">Possible duplicate</span>
+                <% else %>
+                  <span class="inline-flex items-center rounded-full bg-emerald-50 text-emerald-700 px-2.5 py-0.5 text-xs font-medium">New</span>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="flex flex-wrap items-center gap-3">
+    <p class="text-sm text-slate-700" data-import-review-target="summary">
+      <strong data-import-review-target="selectedCount"><%= @total_rows - @duplicate_count %></strong> rows selected for import
+    </p>
+    <div class="flex items-center gap-3 ml-auto">
+      <%= link_to "Cancel Import", csv_imports_path, class: "text-sm font-medium text-slate-600 hover:text-slate-900" %>
+      <%= link_to "← Back", csv_import_column_mapping_path(@csv_import), class: "text-sm font-medium text-slate-600 hover:text-slate-900" %>
+      <%= f.submit "Import Selected", class: "inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 cursor-pointer min-h-[44px]" %>
+    </div>
+  </div>
+<% end %>

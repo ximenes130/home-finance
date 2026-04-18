@@ -1,0 +1,20 @@
+<div class="flex items-center justify-between mb-6">
+  <h1 class="text-lg font-semibold text-slate-900">Dashboard</h1>
+  <span class="text-sm text-slate-500"><%= Date.current.strftime("%B %Y") %></span>
+</div>
+
+<% if @accounts.any? %>
+  <div class="space-y-6">
+    <%= render "dashboard/summary_cards" %>
+    <%= render "dashboard/quick_actions" %>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <%= render "dashboard/accounts_overview" %>
+      <%= render "dashboard/budget_status" %>
+    </div>
+
+    <%= render "dashboard/recent_transactions" %>
+  </div>
+<% else %>
+  <%= render "dashboard/empty_state" %>
+<% end %>

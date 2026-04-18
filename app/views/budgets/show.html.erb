@@ -1,0 +1,79 @@
+<div class="mb-6">
+  <%= link_to "← Back to Budgets", budgets_path(year: @budget.year, month: @budget.month),
+      class: "text-sm font-medium text-indigo-600 hover:text-indigo-700" %>
+</div>
+
+<div class="flex items-center justify-between mb-6">
+  <div>
+    <h1 class="text-lg font-semibold text-slate-900"><%= @budget.category.name %></h1>
+    <p class="text-sm text-slate-500"><%= budget_month_label(@budget.year, @budget.month) %></p>
+  </div>
+  <div class="flex items-center gap-3">
+    <%= link_to "Edit", edit_budget_path(@budget), class: "text-sm text-indigo-600 hover:text-indigo-700" %>
+    <%= button_to "Delete", budget_path(@budget), method: :delete,
+        data: { turbo_confirm: "Delete this budget? This does not affect any transactions." },
+        class: "text-sm text-rose-600 hover:text-rose-700" %>
+  </div>
+</div>
+
+<%# Budget summary cards %>
+<div class="grid grid-cols-3 gap-4 mb-6">
+  <div class="bg-white rounded-lg border border-slate-200 p-4">
+    <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Limit</p>
+    <p class="mt-1 text-2xl font-semibold tabular-nums text-slate-900"><%= format_currency(@budget.amount_limit) %></p>
+  </div>
+  <div class="bg-white rounded-lg border border-slate-200 p-4">
+    <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Spent</p>
+    <p class="mt-1 text-2xl font-semibold tabular-nums text-rose-600"><%= format_currency(@budget.spent) %></p>
+  </div>
+  <div class="bg-white rounded-lg border border-slate-200 p-4">
+    <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Remaining</p>
+    <p class="mt-1 text-2xl font-semibold tabular-nums <%= @budget.remaining >= 0 ? 'text-emerald-600' : 'text-red-600' %>"><%= format_currency(@budget.remaining) %></p>
+  </div>
+</div>
+
+<%# Big progress bar %>
+<div class="bg-white rounded-lg border border-slate-200 p-4 mb-6">
+  <div class="h-4 rounded-full bg-slate-100 overflow-hidden">
+    <div class="h-full rounded-full <%= budget_progress_color(@budget.percent_used) %>"
+         style="width: <%= [@budget.percent_used, 100].min %>%"
+         role="progressbar"
+         aria-valuenow="<%= @budget.percent_used.round %>"
+         aria-valuemin="0"
+         aria-valuemax="100"
+         aria-label="<%= @budget.category.name %>: <%= @budget.percent_used.round %>% of budget used"></div>
+  </div>
+  <div class="mt-2 flex items-center justify-between text-sm">
+    <% if @budget.over_budget? %>
+      <span class="text-red-600 font-medium">Over budget by <%= format_currency(@budget.spent - @budget.amount_limit) %></span>
+    <% else %>
+      <span class="text-slate-500"><%= format_currency(@budget.remaining) %> remaining</span>
+    <% end %>
+    <span class="<%= budget_percent_color(@budget.percent_used) %>"><%= @budget.percent_used.round %>% used</span>
+  </div>
+</div>
+
+<%# Transactions list %>
+<div class="bg-white rounded-lg border border-slate-200">
+  <div class="px-4 py-3 border-b border-slate-200">
+    <h2 class="text-sm font-medium text-slate-500 uppercase tracking-wide">Transactions</h2>
+  </div>
+
+  <% if @transactions.any? %>
+    <div class="divide-y divide-slate-100">
+      <% @transactions.each do |transaction| %>
+        <div class="px-4 py-3 flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-slate-900"><%= transaction.note.presence || "—" %></p>
+            <p class="text-xs text-slate-500"><%= format_transaction_date(transaction.transaction_date) %> · <%= transaction.account.name %></p>
+          </div>
+          <span class="text-sm font-medium tabular-nums text-rose-600">-<%= format_currency(transaction.amount) %></span>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="p-4 text-center">
+      <p class="text-sm text-slate-500">No transactions for this category this month.</p>
+    </div>
+  <% end %>
+</div>

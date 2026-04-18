@@ -1,0 +1,9 @@
+Date,Amount,Description,Category,Type
+2026-04-01,85.50,Weekly groceries,Groceries,expense
+2026-04-02,45.00,Gas station,Gas,expense
+2026-04-03,120.00,Electric bill,Utilities,expense
+2026-04-05,35.00,Lunch out,Dining Out,expense
+2026-04-07,15.00,Morning coffee,Coffee,expense
+2026-04-10,3500.00,Monthly salary,Salary,income
+2026-04-12,60.00,Restaurant dinner,Dining Out,expense
+2026-04-15,25.50,Pharmacy,Health,expense

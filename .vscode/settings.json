@@ -1,0 +1,8 @@
+{
+  "chat.tools.terminal.autoApprove": {
+    "bin/rails test": true,
+    "bin/rails g": true,
+    "bin/rails db:": true,
+    "PARALLEL_WORKERS=1 bin/rails test": true
+  }
+}

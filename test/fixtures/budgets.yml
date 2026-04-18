@@ -1,0 +1,29 @@
+groceries_january:
+  category: groceries
+  year: 2026
+  month: 1
+  amount_limit: 300.00
+
+utilities_january:
+  category: utilities
+  year: 2026
+  month: 1
+  amount_limit: 150.00
+
+groceries_february:
+  category: groceries
+  year: 2026
+  month: 2
+  amount_limit: 300.00
+
+groceries_april:
+  category: groceries
+  year: 2026
+  month: 4
+  amount_limit: 150.00
+
+dining_april:
+  category: dining
+  year: 2026
+  month: 4
+  amount_limit: 50.00

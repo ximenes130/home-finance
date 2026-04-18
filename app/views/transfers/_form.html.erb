@@ -1,0 +1,57 @@
+<% source_account_id = params.dig(:transfer, :source_account_id) %>
+<% destination_account_id = params.dig(:transfer, :destination_account_id) %>
+<% amount = params.dig(:transfer, :amount) %>
+<% transaction_date = params.dig(:transfer, :transaction_date) || Date.current.iso8601 %>
+<% note = params.dig(:transfer, :note) %>
+
+<%= form_with url: transfers_path, method: :post, class: "space-y-6 max-w-lg" do |f| %>
+  <div>
+    <%= f.label "transfer[source_account_id]", "From Account", class: "block text-sm font-medium text-slate-700" %>
+    <select name="transfer[source_account_id]" id="transfer_source_account_id"
+            class="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+      <option value="">— Select account —</option>
+      <% @accounts.each do |account| %>
+        <option value="<%= account.id %>" <%= "selected" if source_account_id == account.id.to_s %>><%= account.name %></option>
+      <% end %>
+    </select>
+  </div>
+
+  <div>
+    <%= f.label "transfer[destination_account_id]", "To Account", class: "block text-sm font-medium text-slate-700" %>
+    <select name="transfer[destination_account_id]" id="transfer_destination_account_id"
+            class="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+      <option value="">— Select account —</option>
+      <% @accounts.each do |account| %>
+        <option value="<%= account.id %>" <%= "selected" if destination_account_id == account.id.to_s %>><%= account.name %></option>
+      <% end %>
+    </select>
+  </div>
+
+  <div>
+    <%= f.label "transfer[amount]", "Amount", class: "block text-sm font-medium text-slate-700" %>
+    <input type="number" name="transfer[amount]" id="transfer_amount"
+           value="<%= amount %>"
+           step="0.01" min="0.01" inputmode="decimal" placeholder="0.00"
+           class="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+  </div>
+
+  <div>
+    <%= f.label "transfer[transaction_date]", "Date", class: "block text-sm font-medium text-slate-700" %>
+    <input type="date" name="transfer[transaction_date]" id="transfer_transaction_date"
+           value="<%= transaction_date %>"
+           class="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+  </div>
+
+  <div>
+    <%= f.label "transfer[note]", "Note (optional)", class: "block text-sm font-medium text-slate-700" %>
+    <textarea name="transfer[note]" id="transfer_note" rows="2" placeholder="Optional note"
+              class="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"><%= note %></textarea>
+  </div>
+
+  <div class="flex items-center gap-3">
+    <button type="submit" class="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 cursor-pointer">
+      Save Transfer
+    </button>
+    <%= link_to "Cancel", transactions_path, class: "text-sm font-medium text-slate-600 hover:text-slate-800" %>
+  </div>
+<% end %>

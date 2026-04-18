@@ -1,0 +1,18 @@
+<nav aria-label="Import progress" class="mb-6">
+  <ol class="flex items-center gap-2 text-sm">
+    <li class="flex items-center gap-2">
+      <span class="flex h-6 w-6 items-center justify-center rounded-full <%= step >= 1 ? 'bg-indigo-600 text-white' : 'bg-slate-200 text-slate-500' %> text-xs font-medium">1</span>
+      <span class="<%= step >= 1 ? 'text-indigo-600 font-medium' : 'text-slate-500' %>">Upload</span>
+    </li>
+    <li class="h-px w-8 bg-slate-300" aria-hidden="true"></li>
+    <li class="flex items-center gap-2">
+      <span class="flex h-6 w-6 items-center justify-center rounded-full <%= step >= 2 ? 'bg-indigo-600 text-white' : 'bg-slate-200 text-slate-500' %> text-xs font-medium">2</span>
+      <span class="<%= step >= 2 ? 'text-indigo-600 font-medium' : 'text-slate-500' %>">Map Columns</span>
+    </li>
+    <li class="h-px w-8 bg-slate-300" aria-hidden="true"></li>
+    <li class="flex items-center gap-2">
+      <span class="flex h-6 w-6 items-center justify-center rounded-full <%= step >= 3 ? 'bg-indigo-600 text-white' : 'bg-slate-200 text-slate-500' %> text-xs font-medium">3</span>
+      <span class="<%= step >= 3 ? 'text-indigo-600 font-medium' : 'text-slate-500' %>">Review & Import</span>
+    </li>
+  </ol>
+</nav>

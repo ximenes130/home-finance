@@ -1,0 +1,38 @@
+<%= form_with(model: account, class: "space-y-6 max-w-lg") do |f| %>
+  <div>
+    <%= f.label :name, class: "block text-sm font-medium text-slate-700" %>
+    <%= f.text_field :name,
+        placeholder: "e.g. Main Checking",
+        class: "mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm #{account.errors[:name].any? ? 'border-rose-300 text-rose-900 focus:border-rose-500 focus:ring-rose-500' : ''}" %>
+    <% if account.errors[:name].any? %>
+      <p class="mt-1 text-sm text-rose-600"><%= account.errors.full_messages_for(:name).first %></p>
+    <% end %>
+  </div>
+
+  <div>
+    <%= f.label :account_type, "Account Type", class: "block text-sm font-medium text-slate-700" %>
+    <%= f.select :account_type,
+        options_for_select([["Cash", "cash"], ["Checking", "checking"], ["Credit Card", "credit_card"], ["Savings", "savings"]], account.account_type),
+        {},
+        class: "mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm #{account.errors[:account_type].any? ? 'border-rose-300 text-rose-900 focus:border-rose-500 focus:ring-rose-500' : ''}" %>
+    <% if account.errors[:account_type].any? %>
+      <p class="mt-1 text-sm text-rose-600"><%= account.errors.full_messages_for(:account_type).first %></p>
+    <% end %>
+  </div>
+
+  <div>
+    <%= f.label :opening_balance, class: "block text-sm font-medium text-slate-700" %>
+    <%= f.number_field :opening_balance,
+        step: 0.01,
+        placeholder: "0.00",
+        class: "mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm #{account.errors[:opening_balance].any? ? 'border-rose-300 text-rose-900 focus:border-rose-500 focus:ring-rose-500' : ''}" %>
+    <% if account.errors[:opening_balance].any? %>
+      <p class="mt-1 text-sm text-rose-600"><%= account.errors.full_messages_for(:opening_balance).first %></p>
+    <% end %>
+  </div>
+
+  <div class="flex items-center gap-3">
+    <%= f.submit class: "inline-flex items-center rounded-md bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 cursor-pointer" %>
+    <%= link_to "Cancel", accounts_path, class: "text-sm font-medium text-slate-600 hover:text-slate-800" %>
+  </div>
+<% end %>

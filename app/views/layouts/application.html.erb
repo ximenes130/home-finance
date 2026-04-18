@@ -23,9 +23,18 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body>
-    <main class="container mx-auto mt-28 px-5 flex">
-      <%= yield %>
+  <body class="bg-slate-50 min-h-screen" data-controller="mobile-nav">
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:p-4 focus:bg-white focus:text-indigo-600">Skip to content</a>
+
+    <%= render "layouts/sidebar" %>
+    <%= render "layouts/mobile_header" %>
+    <%= render "layouts/mobile_drawer" %>
+
+    <main id="main-content" class="lg:pl-56 min-h-screen">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <%= render "layouts/flash" %>
+        <%= yield %>
+      </div>
     </main>
   </body>
 </html>

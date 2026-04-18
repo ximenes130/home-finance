@@ -1,0 +1,107 @@
+<div class="flex items-center justify-between mb-6">
+  <h1 class="text-lg font-semibold text-slate-900">Budgets</h1>
+  <%= link_to new_budget_path(year: @year, month: @month),
+      class: "inline-flex items-center gap-2 rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700" do %>
+    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+      <path d="M12 4.5v15m7.5-7.5h-15" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    New Budget
+  <% end %>
+</div>
+
+<%# Month navigator %>
+<div class="flex items-center justify-center gap-4 mb-6">
+  <%= link_to prev_month_path(@year, @month),
+      class: "p-2 text-slate-400 hover:text-slate-600",
+      aria: { label: "Previous month" } do %>
+    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+      <path d="M15.75 19.5L8.25 12l7.5-7.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  <% end %>
+  <h2 class="text-base font-semibold text-slate-900"><%= budget_month_label(@year, @month) %></h2>
+  <%= link_to next_month_path(@year, @month),
+      class: "p-2 text-slate-400 hover:text-slate-600",
+      aria: { label: "Next month" } do %>
+    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+      <path d="M8.25 4.5l7.5 7.5-7.5 7.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  <% end %>
+</div>
+
+<% if @budgets.any? %>
+  <%# Summary %>
+  <div class="grid grid-cols-3 gap-4 mb-6">
+    <div class="bg-white rounded-lg border border-slate-200 p-4">
+      <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Total Budgeted</p>
+      <p class="mt-1 text-lg font-semibold tabular-nums text-slate-900"><%= format_currency(@total_budgeted) %></p>
+    </div>
+    <div class="bg-white rounded-lg border border-slate-200 p-4">
+      <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Total Spent</p>
+      <p class="mt-1 text-lg font-semibold tabular-nums text-rose-600"><%= format_currency(@total_spent) %></p>
+    </div>
+    <div class="bg-white rounded-lg border border-slate-200 p-4">
+      <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Total Remaining</p>
+      <p class="mt-1 text-lg font-semibold tabular-nums <%= @total_remaining >= 0 ? 'text-emerald-600' : 'text-red-600' %>"><%= format_currency(@total_remaining) %></p>
+    </div>
+  </div>
+
+  <%# Budget list %>
+  <div class="bg-white rounded-lg border border-slate-200">
+    <div class="divide-y divide-slate-100">
+      <% @budgets.each do |budget| %>
+        <div class="p-4">
+          <div class="flex items-start justify-between">
+            <div class="flex-1">
+              <div class="flex items-center justify-between">
+                <span class="text-sm font-medium text-slate-900"><%= budget.category.name %></span>
+                <span class="text-sm tabular-nums text-slate-500"><%= format_currency(budget.spent) %> / <%= format_currency(budget.amount_limit) %></span>
+              </div>
+              <%# Progress bar %>
+              <div class="mt-2 h-2.5 rounded-full bg-slate-100 overflow-hidden">
+                <div class="h-full rounded-full <%= budget_progress_color(budget.percent_used) %>"
+                     style="width: <%= [budget.percent_used, 100].min %>%"
+                     role="progressbar"
+                     aria-valuenow="<%= budget.percent_used.round %>"
+                     aria-valuemin="0"
+                     aria-valuemax="100"
+                     aria-label="<%= budget.category.name %>: <%= budget.percent_used.round %>% of budget used"></div>
+              </div>
+              <div class="mt-1 flex items-center justify-between text-xs">
+                <% if budget.over_budget? %>
+                  <span class="text-red-600">Over budget by <%= format_currency(budget.spent - budget.amount_limit) %></span>
+                <% else %>
+                  <span class="text-slate-400"><%= format_currency(budget.remaining) %> remaining</span>
+                <% end %>
+                <span class="<%= budget_percent_color(budget.percent_used) %>"><%= budget.percent_used.round %>%</span>
+              </div>
+            </div>
+            <div class="ml-4 flex items-center gap-2">
+              <%= link_to "View", budget, class: "text-sm text-indigo-600 hover:text-indigo-700" %>
+              <%= link_to "Edit", edit_budget_path(budget), class: "text-sm text-indigo-600 hover:text-indigo-700" %>
+              <%= button_to "Delete", budget_path(budget), method: :delete,
+                  data: { turbo_confirm: "Delete the budget for #{budget.category.name} in #{budget_month_label(budget.year, budget.month)}? This does not affect any transactions." },
+                  class: "text-sm text-rose-600 hover:text-rose-700" %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+<% else %>
+  <div class="text-center py-12">
+    <svg class="mx-auto h-12 w-12 text-slate-300" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+      <path d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <h3 class="mt-2 text-sm font-semibold text-slate-900">No budgets for <%= budget_month_label(@year, @month) %></h3>
+    <p class="mt-1 text-sm text-slate-500">Set spending limits to track your expenses against your plan.</p>
+    <div class="mt-6">
+      <%= link_to new_budget_path(year: @year, month: @month),
+          class: "inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-indigo-700" do %>
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path d="M12 4.5v15m7.5-7.5h-15" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Create Budget
+      <% end %>
+    </div>
+  </div>
+<% end %>

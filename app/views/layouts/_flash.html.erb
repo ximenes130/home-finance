@@ -1,0 +1,17 @@
+<% flash.each do |type, message| %>
+  <div data-controller="flash" role="alert"
+       class="mb-4 rounded-md p-4
+              <%= case type
+                  when 'notice' then 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                  when 'alert'  then 'bg-rose-50 text-rose-800 border border-rose-200'
+                  end %>">
+    <div class="flex items-center">
+      <p class="text-sm font-medium"><%= message %></p>
+      <button class="ml-auto -mr-1 p-1 text-current opacity-50 hover:opacity-100" data-action="click->flash#dismiss" aria-label="Dismiss">
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+<% end %>

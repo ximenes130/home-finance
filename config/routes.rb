@@ -9,6 +9,23 @@ Rails.application.routes.draw do
   # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
-  # Defines the root path route ("/")
-  # root "posts#index"
+  root "dashboard#show"
+
+  resources :accounts do
+    resource :activation, only: [ :create, :destroy ], controller: "accounts/activations"
+  end
+
+  resources :categories, except: :show
+
+  resources :budgets
+
+  resources :transactions, except: :show
+  resources :transfers, only: [ :new, :create ]
+
+  resources :csv_imports, only: [ :index, :new, :create, :show ] do
+    resource :column_mapping, only: [ :show, :update ], controller: "csv_imports/column_mappings"
+    resource :confirmation, only: [ :show, :create ], controller: "csv_imports/confirmations"
+  end
+
+  resources :csv_exports, only: [ :new, :create ]
 end

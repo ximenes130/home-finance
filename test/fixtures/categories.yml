@@ -1,0 +1,19 @@
+salary:
+  name: "Salary"
+  kind: income
+
+freelance:
+  name: "Freelance"
+  kind: income
+
+groceries:
+  name: "Groceries"
+  kind: expense
+
+utilities:
+  name: "Utilities"
+  kind: expense
+
+dining:
+  name: "Dining Out"
+  kind: expense

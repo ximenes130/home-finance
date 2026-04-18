@@ -1,0 +1,60 @@
+<%= render "csv_imports/step_indicator", step: 2 %>
+
+<h1 class="text-lg font-semibold text-slate-900 mb-6">Import Transactions from CSV</h1>
+
+<div class="bg-white rounded-lg border border-slate-200 p-4 sm:p-6 mb-6">
+  <h2 class="text-sm font-medium text-slate-500 uppercase tracking-wide mb-4">Map your CSV columns to transaction fields</h2>
+
+  <%= form_with url: csv_import_column_mapping_path(@csv_import), method: :patch, class: "space-y-4" do |f| %>
+    <% CsvImport::TRANSACTION_FIELDS.each do |field| %>
+      <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+        <label for="column_mapping_<%= field %>" class="text-sm font-medium text-slate-700 sm:w-40">
+          <%= field.humanize %>
+          <% if %w[transaction_date amount].include?(field) %>
+            <span class="text-rose-500">*</span>
+          <% else %>
+            <span class="text-slate-400 text-xs">(optional)</span>
+          <% end %>
+        </label>
+        <select name="column_mapping[<%= field %>]" id="column_mapping_<%= field %>"
+                class="block w-full sm:w-64 rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 min-h-[44px]">
+          <option value="">— Not mapped —</option>
+          <% @headers.each do |header| %>
+            <option value="<%= header %>" <%= "selected" if @detected_mapping[field] == header %>><%= header %></option>
+          <% end %>
+        </select>
+      </div>
+    <% end %>
+
+    <% if @preview_rows.any? %>
+      <div class="mt-6">
+        <h3 class="text-sm font-medium text-slate-500 uppercase tracking-wide mb-3">Preview (first <%= @preview_rows.size %> rows)</h3>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-slate-200 text-sm">
+            <thead class="bg-slate-50">
+              <tr>
+                <% @headers.each do |header| %>
+                  <th class="px-3 py-2 text-left text-xs font-medium text-slate-500 uppercase tracking-wide"><%= header %></th>
+                <% end %>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              <% @preview_rows.each do |row| %>
+                <tr>
+                  <% row.each do |cell| %>
+                    <td class="px-3 py-2 text-sm text-slate-700 whitespace-nowrap"><%= cell %></td>
+                  <% end %>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    <% end %>
+
+    <div class="flex items-center gap-3 pt-4">
+      <%= f.submit "Confirm Mapping", class: "inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 cursor-pointer min-h-[44px]" %>
+      <%= link_to "← Back", new_csv_import_path, class: "text-sm font-medium text-slate-600 hover:text-slate-900" %>
+    </div>
+  <% end %>
+</div>

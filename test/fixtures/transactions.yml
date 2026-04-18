@@ -1,0 +1,83 @@
+salary_january:
+  account: checking
+  kind: income
+  amount: 3000.00
+  transaction_date: "2026-01-15"
+  category: salary
+  note: "January salary"
+
+grocery_january:
+  account: checking
+  kind: expense
+  amount: 150.00
+  transaction_date: "2026-01-20"
+  category: groceries
+  note: "Weekly groceries"
+
+utility_january:
+  account: checking
+  kind: expense
+  amount: 80.00
+  transaction_date: "2026-01-25"
+  category: utilities
+
+transfer_out:
+  account: checking
+  kind: expense
+  amount: 500.00
+  transaction_date: "2026-01-10"
+  transfer_pair_id: "transfer-001"
+
+transfer_in:
+  account: savings
+  kind: income
+  amount: 500.00
+  transaction_date: "2026-01-10"
+  transfer_pair_id: "transfer-001"
+
+grocery_february:
+  account: checking
+  kind: expense
+  amount: 200.00
+  transaction_date: "2026-02-05"
+  category: groceries
+
+salary_april:
+  account: checking
+  kind: income
+  amount: 3500.00
+  transaction_date: "2026-04-01"
+  category: salary
+  note: "April salary"
+
+grocery_april:
+  account: checking
+  kind: expense
+  amount: 120.00
+  transaction_date: "2026-04-10"
+  category: groceries
+  note: "Weekly groceries"
+
+dining_april:
+  account: credit_card
+  kind: expense
+  amount: 45.00
+  transaction_date: "2026-04-12"
+  category: dining
+  note: "Dinner out"
+
+transfer_april_out:
+  account: checking
+  kind: expense
+  amount: 1000.00
+  transaction_date: "2026-04-05"
+  transfer_pair_id: "transfer-002"
+  note: "Monthly savings"
+
+transfer_april_in:
+  account: savings
+  kind: income
+  amount: 1000.00
+  transaction_date: "2026-04-05"
+  transfer_pair_id: "transfer-002"
+  note: "Monthly savings"

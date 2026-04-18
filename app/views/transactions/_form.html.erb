@@ -1,0 +1,103 @@
+<%= form_with(model: transaction, class: "space-y-6 max-w-lg", data: { controller: "transaction-form" }) do |f| %>
+  <% is_transfer = transaction.transfer_pair_id.present? %>
+
+  <% if is_transfer %>
+    <div>
+      <span class="block text-sm font-medium text-slate-700">Kind</span>
+      <p class="mt-1 text-sm text-slate-500"><%= transaction_kind_badge(transaction) %></p>
+      <p class="mt-1 text-xs text-slate-400">Transfer details cannot be changed. To modify accounts or amount, delete this transfer and create a new one.</p>
+    </div>
+
+    <div>
+      <span class="block text-sm font-medium text-slate-700">Account</span>
+      <p class="mt-1 text-sm text-slate-900"><%= transaction.account.name %></p>
+      <% if (pair = transaction.transfer_pair) %>
+        <p class="mt-0.5 text-xs text-blue-500">&harr; <%= pair.account.name %></p>
+      <% end %>
+    </div>
+
+    <div>
+      <span class="block text-sm font-medium text-slate-700">Amount</span>
+      <p class="mt-1 text-sm font-medium tabular-nums text-slate-900"><%= format_currency(transaction.amount) %></p>
+    </div>
+  <% else %>
+    <fieldset>
+      <legend class="block text-sm font-medium text-slate-700">Kind</legend>
+      <div class="mt-2 flex items-center gap-4">
+        <label class="inline-flex items-center gap-2 cursor-pointer">
+          <%= f.radio_button :kind, "income",
+              data: { action: "change->transaction-form#filterCategories" },
+              class: "text-indigo-600 focus:ring-indigo-500" %>
+          <span class="text-sm font-medium text-slate-700">Income</span>
+        </label>
+        <label class="inline-flex items-center gap-2 cursor-pointer">
+          <%= f.radio_button :kind, "expense",
+              data: { action: "change->transaction-form#filterCategories" },
+              class: "text-indigo-600 focus:ring-indigo-500" %>
+          <span class="text-sm font-medium text-slate-700">Expense</span>
+        </label>
+      </div>
+      <% if transaction.errors[:kind].any? %>
+        <p class="mt-1 text-sm text-rose-600"><%= transaction.errors.full_messages_for(:kind).first %></p>
+      <% end %>
+    </fieldset>
+
+    <div>
+      <%= f.label :account_id, "Account", class: "block text-sm font-medium text-slate-700" %>
+      <%= f.select :account_id,
+          options_for_select(@accounts.map { |a| [a.name, a.id] }, transaction.account_id),
+          { include_blank: "— Select account —" },
+          class: "mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm #{transaction.errors[:account_id].any? ? 'border-rose-300 text-rose-900 focus:border-rose-500 focus:ring-rose-500' : ''}" %>
+      <% if transaction.errors[:account_id].any? %>
+        <p class="mt-1 text-sm text-rose-600"><%= transaction.errors.full_messages_for(:account_id).first %></p>
+      <% end %>
+    </div>
+
+    <div>
+      <%= f.label :amount, class: "block text-sm font-medium text-slate-700" %>
+      <%= f.number_field :amount,
+          step: 0.01,
+          min: 0.01,
+          inputmode: "decimal",
+          placeholder: "0.00",
+          class: "mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm #{transaction.errors[:amount].any? ? 'border-rose-300 text-rose-900 focus:border-rose-500 focus:ring-rose-500' : ''}" %>
+      <% if transaction.errors[:amount].any? %>
+        <p class="mt-1 text-sm text-rose-600"><%= transaction.errors.full_messages_for(:amount).first %></p>
+      <% end %>
+    </div>
+  <% end %>
+
+  <div>
+    <%= f.label :transaction_date, "Date", class: "block text-sm font-medium text-slate-700" %>
+    <%= f.date_field :transaction_date,
+        value: transaction.transaction_date || Date.current,
+        class: "mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm #{transaction.errors[:transaction_date].any? ? 'border-rose-300 text-rose-900 focus:border-rose-500 focus:ring-rose-500' : ''}" %>
+    <% if transaction.errors[:transaction_date].any? %>
+      <p class="mt-1 text-sm text-rose-600"><%= transaction.errors.full_messages_for(:transaction_date).first %></p>
+    <% end %>
+  </div>
+
+  <% unless is_transfer %>
+    <div>
+      <%= f.label :category_id, "Category", class: "block text-sm font-medium text-slate-700" %>
+      <%= f.select :category_id,
+          options_for_select(@categories.map { |c| [c.name, c.id, { "data-kind" => c.kind }] }, transaction.category_id),
+          { include_blank: "— Select category —" },
+          { data: { transaction_form_target: "category" },
+            class: "mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" } %>
+    </div>
+  <% end %>
+
+  <div>
+    <%= f.label :note, "Note (optional)", class: "block text-sm font-medium text-slate-700" %>
+    <%= f.text_area :note,
+        rows: 2,
+        placeholder: "Optional note",
+        class: "mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+  </div>
+
+  <div class="flex items-center gap-3">
+    <%= f.submit class: "inline-flex items-center rounded-md bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 cursor-pointer" %>
+    <%= link_to "Cancel", transactions_path, class: "text-sm font-medium text-slate-600 hover:text-slate-800" %>
+  </div>
+<% end %>

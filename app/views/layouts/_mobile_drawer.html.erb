@@ -1,0 +1,25 @@
+<div data-mobile-nav-target="container" class="lg:hidden hidden">
+  <%# Backdrop %>
+  <div class="fixed inset-0 z-40 bg-slate-900/50" data-action="click->mobile-nav#close"></div>
+
+  <%# Panel %>
+  <div class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-200">
+    <div class="flex items-center h-14 px-4 border-b border-slate-200">
+      <span class="text-lg font-semibold text-slate-900">Home Finance</span>
+      <button class="ml-auto p-1 text-slate-400 hover:text-slate-600" data-action="click->mobile-nav#close" aria-label="Close navigation menu">
+        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+    <nav class="px-2 py-4 space-y-1" aria-label="Main navigation">
+      <%= nav_link_to "Dashboard", root_path, icon: :home %>
+      <%= nav_link_to "Transactions", transactions_path, icon: :banknotes %>
+      <%= nav_link_to "Accounts", accounts_path, icon: :building_library %>
+      <%= nav_link_to "Categories", categories_path, icon: :tag %>
+      <%= nav_link_to "Budgets", budgets_path, icon: :chart_bar %>
+      <%= nav_link_to "Import", csv_imports_path, icon: :arrow_up_tray %>
+      <%= nav_link_to "Export", new_csv_export_path, icon: :arrow_down_tray %>
+    </nav>
+  </div>
+</div>

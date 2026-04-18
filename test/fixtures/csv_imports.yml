@@ -1,0 +1,16 @@
+recent_import:
+  account: checking
+  filename: "bank_statement_jan.csv"
+  row_count: 10
+  imported_count: 8
+  skipped_count: 2
+  status: completed
+  imported_at: "2026-01-31 12:00:00"
+
+pending_import:
+  account: checking
+  filename: "bank_statement_feb.csv"
+  row_count: 0
+  imported_count: 0
+  skipped_count: 0
+  status: pending

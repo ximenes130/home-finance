@@ -1,0 +1,23 @@
+<tr class="hover:bg-slate-50">
+  <td class="px-4 py-3 text-sm text-slate-500 whitespace-nowrap">
+    <%= format_transaction_date(transaction.transaction_date) %>
+  </td>
+  <td class="px-4 py-3">
+    <span class="text-sm font-medium text-slate-900"><%= transaction.note.presence || "—" %></span>
+    <% if transaction.transfer_pair_id.present? && (pair = transaction.transfer_pair) %>
+      <span class="block text-xs text-blue-500">&harr; <%= pair.account.name %></span>
+    <% end %>
+  </td>
+  <td class="px-4 py-3"><%= transaction_kind_badge(transaction) %></td>
+  <td class="px-4 py-3 text-sm text-slate-500"><%= transaction.category&.name || "—" %></td>
+  <td class="px-4 py-3 text-sm text-slate-500"><%= transaction.account.name %></td>
+  <td class="px-4 py-3 text-sm font-medium tabular-nums text-right">
+    <%= format_transaction_amount(transaction) %>
+  </td>
+  <td class="px-4 py-3 text-right space-x-2">
+    <%= link_to "Edit", edit_transaction_path(transaction), class: "text-sm text-indigo-600 hover:text-indigo-700" %>
+    <%= button_to "Delete", transaction_path(transaction), method: :delete,
+        data: { turbo_confirm: transaction.transfer_pair_id.present? ? "Delete this transfer? Both sides will be removed. This cannot be undone." : "Delete this transaction? This cannot be undone." },
+        class: "text-sm text-rose-600 hover:text-rose-700" %>
+  </td>
+</tr>

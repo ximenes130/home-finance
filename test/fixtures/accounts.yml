@@ -1,0 +1,29 @@
+checking:
+  name: "Main Checking"
+  account_type: checking
+  opening_balance: 1000.00
+  active: true
+
+savings:
+  name: "Emergency Savings"
+  account_type: savings
+  opening_balance: 5000.00
+  active: true
+
+credit_card:
+  name: "Visa Card"
+  account_type: credit_card
+  opening_balance: 0.00
+  active: true
+
+cash:
+  name: "Wallet Cash"
+  account_type: cash
+  opening_balance: 200.00
+  active: true
+
+inactive:
+  name: "Old Account"
+  account_type: checking
+  opening_balance: 0.00
+  active: false
