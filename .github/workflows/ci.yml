@@ -157,7 +157,6 @@ jobs:
       - name: Update add-on config version
         run: |
           sed -i "s/^version:.*/version: \"${{ steps.tag_version.outputs.new_version }}\"/" home_finance/config.yaml
-          sed -i "s/^version:.*/version: \"${{ steps.tag_version.outputs.new_version }}\"/" config.yaml
           sed -i "s/ARG BUILD_VERSION=.*/ARG BUILD_VERSION=${{ steps.tag_version.outputs.new_version }}/" Dockerfile
 
       - name: Write version to Ruby file
@@ -167,7 +166,7 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: "chore: bump version to ${{ steps.tag_version.outputs.new_tag }} [skip ci]"
-          file_pattern: config/initializers/current_version.rb home_finance/config.yaml config.yaml Dockerfile
+          file_pattern: config/initializers/current_version.rb home_finance/config.yaml Dockerfile
 
   deploy:
     name: Deploy
