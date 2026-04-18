@@ -1,0 +1,12 @@
+{
+  "ignored_warnings": [
+    {
+      "fingerprint": "ed50f138c1ccf5c32fee0fee8aa8992d0edd61c44922a3eae0d5740981a4c768",
+      "note": "account_id is safe: scoped to current user's accounts in the controller"
+    },
+    {
+      "fingerprint": "eeeb29eca1541b8d287966c91761a96d99f5284dee30529e3d5604a2ce565037",
+      "note": "account_id is safe: scoped to current user's accounts in the controller"
+    }
+  ]
+}
