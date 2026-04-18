@@ -28,10 +28,11 @@ ENV RAILS_ENV="production" \
     BUNDLE_PATH="/usr/local/bundle" \
     BUNDLE_WITHOUT="development" \
     HTTP_PORT="3000" \
-    LD_PRELOAD="/usr/local/lib/libjemalloc.so"
+    LD_PRELOAD="/usr/local/lib/libjemalloc.so" \
+    BUILD_VERSION="0.1.0"
 
 LABEL \
-  io.hass.version="0.1.0" \
+  io.hass.version="${BUILD_VERSION}" \
   io.hass.type="addon" \
   io.hass.arch="aarch64|amd64|armhf|armv7"
 

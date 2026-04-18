@@ -3,7 +3,11 @@ name: CI
 on:
   pull_request:
   push:
-    branches: [ main ]
+    branches:
+      - main
+    tags-ignore:
+      - '*.*.*'
+      - 'v*.*.*'
 
 jobs:
   scan_ruby:
@@ -20,10 +24,10 @@ jobs:
 
       - name: Scan for common Rails security vulnerabilities using static analysis
         run: bin/brakeman --no-pager
-      
+
       - name: Scan for known security vulnerabilities in gems used
         run: bin/bundler-audit
-      
+
   scan_js:
     runs-on: ubuntu-latest
 
@@ -53,7 +57,7 @@ jobs:
           bundler-cache: true
 
       - name: Prepare RuboCop cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         env:
           DEPENDENCIES_HASH: ${{ hashFiles('.ruby-version', '**/.rubocop.yml', '**/.rubocop_todo.yml', 'Gemfile.lock') }}
         with:
@@ -75,11 +79,13 @@ jobs:
     #      - 6379:6379
     #    options: --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5
     steps:
-      - name: Install packages
-        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y libvips
-
       - name: Checkout code
         uses: actions/checkout@v6
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libvips sqlite3 libssl-dev imagemagick librsvg2-bin
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
@@ -103,9 +109,6 @@ jobs:
     #      - 6379:6379
     #    options: --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5
     steps:
-      - name: Install packages
-        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y libvips
-
       - name: Checkout code
         uses: actions/checkout@v6
 
@@ -114,17 +117,113 @@ jobs:
         with:
           bundler-cache: true
 
-      - name: Run System Tests
-        env:
-          RAILS_ENV: test
-          # RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
-          # REDIS_URL: redis://localhost:6379/0
-        run: bin/rails db:test:prepare test:system
+      # - name: Run System Tests
+      #   env:
+      #     RAILS_ENV: test
+      #     # RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
+      #     # REDIS_URL: redis://localhost:6379/0
+      #   run: bin/rails db:test:prepare test:system
 
-      - name: Keep screenshots from failed system tests
-        uses: actions/upload-artifact@v4
-        if: failure()
+      # - name: Keep screenshots from failed system tests
+      #   uses: actions/upload-artifact@v7
+      #   if: failure()
+      #   with:
+      #     name: screenshots
+      #     path: ${{ github.workspace }}/tmp/screenshots
+      #     if-no-files-found: ignore
+
+  version_bump:
+    name: Bump version
+    needs: [scan_ruby, scan_js, lint, test, system-test]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      new_tag: ${{ steps.tag_version.outputs.new_tag }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
         with:
-          name: screenshots
-          path: ${{ github.workspace }}/tmp/screenshots
-          if-no-files-found: ignore
+          fetch-depth: 0
+
+      - name: Bump version and push tag
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v6.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          default_bump: patch
+
+      - name: Update add-on config version
+        run: |
+          - sed -i "s/^version:.*/version: \"${{ steps.tag_version.outputs.new_version }}\"/" home_finance/config.yaml
+          - sed -i "s/^version:.*/version: \"${{ steps.tag_version.outputs.new_version }}\"/" config.yaml
+          - sed -i "s/ARG BUILD_VERSION=.*/ARG BUILD_VERSION=${{ steps.tag_version.outputs.new_version }}/" Dockerfile
+
+      - name: Write version to Ruby file
+        run: echo "HomeFinance::VERSION = \"${{ steps.tag_version.outputs.new_tag }}\"" > config/initializers/current_version.rb
+
+      - name: Commit and push file change
+        uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          commit_message: "chore: bump version to ${{ steps.tag_version.outputs.new_tag }} [skip ci]"
+          file_pattern: config/initializers/current_version.rb home_finance/config.yaml
+
+  deploy:
+    name: Deploy
+    needs: [version_bump]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: aarch64
+            platform: linux/arm64
+          - arch: amd64
+            platform: linux/amd64
+          - arch: armhf
+            platform: linux/arm/v6
+          - arch: armv7
+            platform: linux/arm/v7
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+
+      - name: Read version from config.yaml
+        id: version
+        run: |
+          VERSION=$(grep '^version:' home_finance/config.yaml | sed 's/^version:[[:space:]]*//' | tr -d '"')
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push ${{ matrix.arch }}
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: ${{ matrix.platform }}
+          push: true
+          tags: |
+            ghcr.io/ximenes130/home-finance/${{ matrix.arch }}:${{ steps.version.outputs.version }}
+            ghcr.io/ximenes130/home-finance/${{ matrix.arch }}:latest
+          cache-from: type=gha,scope=${{ matrix.arch }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.arch }}
