@@ -18,6 +18,7 @@ Rails.application.routes.draw do
   resources :categories, except: :show
 
   resources :budgets
+  resource :budget_copy, only: [ :new, :create ]
 
   resources :transactions, except: :show
   resources :transfers, only: [ :new, :create ]
