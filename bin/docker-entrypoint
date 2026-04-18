@@ -6,6 +6,15 @@
 # When running as an HA add-on, the Supervisor writes user configuration to
 # /data/options.json and provides a SUPERVISOR_TOKEN env var.
 
+# Generate and persist a secret_key_base for this installation if not yet created.
+# Rails requires this in production; we store it in /data so it survives container updates.
+SECRET_KEY_FILE="/data/secret_key_base"
+if [ ! -f "${SECRET_KEY_FILE}" ]; then
+  openssl rand -hex 64 > "${SECRET_KEY_FILE}"
+  chmod 600 "${SECRET_KEY_FILE}"
+fi
+export SECRET_KEY_BASE="$(cat "${SECRET_KEY_FILE}")"
+
 if [ -f /data/options.json ]; then
   # Apply timezone from add-on options
   ADDON_TZ=$(jq --raw-output '.timezone // empty' /data/options.json)
