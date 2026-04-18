@@ -21,13 +21,10 @@ RUN apt-get update -qq && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
 # Set production environment variables and enable jemalloc for reduced memory usage and latency.
-# HTTP_PORT=3000 configures Thruster to listen on a non-privileged port (required when running as root
-# inside Home Assistant add-on containers, and avoids CAP_NET_BIND_SERVICE concerns).
 ENV RAILS_ENV="production" \
     BUNDLE_DEPLOYMENT="1" \
     BUNDLE_PATH="/usr/local/bundle" \
     BUNDLE_WITHOUT="development" \
-    HTTP_PORT="3000" \
     LD_PRELOAD="/usr/local/lib/libjemalloc.so" \
     BUILD_VERSION="0.1.0"
 
@@ -78,7 +75,6 @@ COPY --from=build /rails /rails
 # Entrypoint prepares the database.
 ENTRYPOINT ["/rails/bin/docker-entrypoint"]
 
-# Start server via Thruster by default, this can be overwritten at runtime.
-# Thruster listens on HTTP_PORT (3000) and proxies to the Rails/Puma process internally.
+# Puma listens directly on port 3000. HA ingress proxies to this port.
 EXPOSE 3000
-CMD ["./bin/thrust", "./bin/rails", "server"]
+CMD ["./bin/rails", "server", "-b", "0.0.0.0"]
