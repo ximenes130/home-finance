@@ -3,6 +3,7 @@ description: "Simple household finance management – track accounts, transactio
 version: "0.1.0"
 slug: "home_finance"
 url: "https://github.com/ximenes130/home-finance"
+image: "ghcr.io/ximenes130/home-finance/{arch}"
 startup: application
 boot: auto
 init: false
