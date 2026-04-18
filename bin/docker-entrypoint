@@ -1,5 +1,38 @@
 #!/bin/bash -e
 
+# ---------------------------------------------------------------------------
+# Home Assistant add-on bootstrap
+# ---------------------------------------------------------------------------
+# When running as an HA add-on, the Supervisor writes user configuration to
+# /data/options.json and provides a SUPERVISOR_TOKEN env var.
+
+if [ -f /data/options.json ]; then
+  # Apply timezone from add-on options
+  ADDON_TZ=$(jq --raw-output '.timezone // empty' /data/options.json)
+  if [ -n "${ADDON_TZ}" ]; then
+    export TZ="${ADDON_TZ}"
+  fi
+
+  # Export currency so Rails can read it via ENV["HOME_FINANCE_CURRENCY"]
+  ADDON_CURRENCY=$(jq --raw-output '.currency // empty' /data/options.json)
+  if [ -n "${ADDON_CURRENCY}" ]; then
+    export HOME_FINANCE_CURRENCY="${ADDON_CURRENCY}"
+  fi
+fi
+
+# Resolve the HA ingress entry path so Rails generates correct URLs behind
+# the ingress reverse proxy (sets RAILS_RELATIVE_URL_ROOT).
+if [ -n "${SUPERVISOR_TOKEN:-}" ]; then
+  INGRESS_ENTRY=$(curl -sf \
+    -H "Authorization: Bearer ${SUPERVISOR_TOKEN}" \
+    http://supervisor/addons/self/info \
+    | jq --raw-output '.data.ingress_entry // empty' 2>/dev/null || true)
+  if [ -n "${INGRESS_ENTRY}" ]; then
+    export RAILS_RELATIVE_URL_ROOT="${INGRESS_ENTRY}"
+  fi
+fi
+# ---------------------------------------------------------------------------
+
 # If running the rails server then create or migrate existing database
 if [ "${@: -2:1}" == "./bin/rails" ] && [ "${@: -1:1}" == "server" ]; then
   ./bin/rails db:prepare

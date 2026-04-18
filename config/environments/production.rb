@@ -79,12 +79,12 @@ Rails.application.configure do
   # Only use :id for inspections in production.
   config.active_record.attributes_for_inspect = [ :id ]
 
-  # Enable DNS rebinding protection and other `Host` header attacks.
-  # config.hosts = [
-  #   "example.com",     # Allow requests from example.com
-  #   /.*\.example\.com/ # Allow requests from subdomains like `www.example.com`
-  # ]
-  #
-  # Skip DNS rebinding protection for the default health check endpoint.
-  # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
+  # Allow all hosts when running as a Home Assistant add-on (requests arrive via the HA ingress
+  # proxy with a non-deterministic host header). Restrict to specific hosts by setting
+  # RAILS_ALLOWED_HOSTS=host1,host2 in non-HA environments.
+  if ENV["RAILS_ALLOWED_HOSTS"].present?
+    config.hosts = ENV["RAILS_ALLOWED_HOSTS"].split(",")
+  else
+    config.hosts = nil
+  end
 end

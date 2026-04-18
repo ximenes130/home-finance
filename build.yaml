@@ -1,0 +1,10 @@
+labels:
+  io.hass.name: "Home Finance"
+  io.hass.description: "Simple household finance management"
+  io.hass.arch: "aarch64|amd64|armhf|armv7"
+  io.hass.type: "addon"
+  io.hass.version: "{BUILD_VERSION}"
+  org.opencontainers.image.title: "Home Finance"
+  org.opencontainers.image.description: "Simple household finance management"
+  org.opencontainers.image.source: "https://github.com/ximenes130/home-finance"
+  org.opencontainers.image.licenses: "MIT"

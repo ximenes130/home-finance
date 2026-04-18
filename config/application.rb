@@ -23,5 +23,9 @@ module HomeFinance
     #
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
+
+    # Support Home Assistant ingress: the entrypoint sets RAILS_RELATIVE_URL_ROOT
+    # to the dynamic ingress path so all generated URLs are correctly prefixed.
+    config.relative_url_root = ENV["RAILS_RELATIVE_URL_ROOT"] if ENV["RAILS_RELATIVE_URL_ROOT"].present?
   end
 end

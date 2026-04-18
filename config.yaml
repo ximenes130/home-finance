@@ -1,0 +1,28 @@
+name: "Home Finance"
+description: "Simple household finance management – track accounts, transactions, categories, and monthly budgets."
+version: "0.1.0"
+slug: "home_finance"
+url: "https://github.com/ximenes130/home-finance"
+startup: application
+boot: auto
+init: false
+ingress: true
+ingress_port: 3000
+ingress_stream: true
+panel_icon: "mdi:cash-multiple"
+panel_title: "Home Finance"
+hassio_api: true
+hassio_role: default
+arch:
+  - aarch64
+  - amd64
+  - armhf
+  - armv7
+options:
+  timezone: "UTC"
+  currency: "USD"
+schema:
+  timezone: str
+  currency: str
+map:
+  - data:rw

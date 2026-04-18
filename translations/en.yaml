@@ -1,0 +1,7 @@
+configuration:
+  timezone:
+    name: Timezone
+    description: "The timezone for displaying dates and times (e.g., America/New_York, Europe/London, UTC)."
+  currency:
+    name: Currency
+    description: "The currency code to show alongside amounts (e.g., USD, EUR, GBP, BRL)."

@@ -16,16 +16,24 @@ WORKDIR /rails
 
 # Install base packages
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y curl libjemalloc2 libvips sqlite3 && \
+    apt-get install --no-install-recommends -y curl jq libjemalloc2 libvips sqlite3 && \
     ln -s /usr/lib/$(uname -m)-linux-gnu/libjemalloc.so.2 /usr/local/lib/libjemalloc.so && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
 # Set production environment variables and enable jemalloc for reduced memory usage and latency.
+# HTTP_PORT=3000 configures Thruster to listen on a non-privileged port (required when running as root
+# inside Home Assistant add-on containers, and avoids CAP_NET_BIND_SERVICE concerns).
 ENV RAILS_ENV="production" \
     BUNDLE_DEPLOYMENT="1" \
     BUNDLE_PATH="/usr/local/bundle" \
     BUNDLE_WITHOUT="development" \
+    HTTP_PORT="3000" \
     LD_PRELOAD="/usr/local/lib/libjemalloc.so"
+
+LABEL \
+  io.hass.version="0.1.0" \
+  io.hass.type="app" \
+  io.hass.arch="aarch64|amd64|armhf|armv7"
 
 # Throw-away build stage to reduce size of final image
 FROM base AS build
@@ -60,18 +68,16 @@ RUN SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
 # Final stage for app image
 FROM base
 
-# Run and own only the runtime files as a non-root user for security
-RUN groupadd --system --gid 1000 rails && \
-    useradd rails --uid 1000 --gid 1000 --create-home --shell /bin/bash
-USER 1000:1000
-
 # Copy built artifacts: gems, application
-COPY --chown=rails:rails --from=build "${BUNDLE_PATH}" "${BUNDLE_PATH}"
-COPY --chown=rails:rails --from=build /rails /rails
+# Running as root is required for Home Assistant add-on compatibility: the HA Supervisor mounts
+# /data with root ownership, so the process must be root to read add-on options and write databases.
+COPY --from=build "${BUNDLE_PATH}" "${BUNDLE_PATH}"
+COPY --from=build /rails /rails
 
 # Entrypoint prepares the database.
 ENTRYPOINT ["/rails/bin/docker-entrypoint"]
 
-# Start server via Thruster by default, this can be overwritten at runtime
-EXPOSE 80
+# Start server via Thruster by default, this can be overwritten at runtime.
+# Thruster listens on HTTP_PORT (3000) and proxies to the Rails/Puma process internally.
+EXPOSE 3000
 CMD ["./bin/thrust", "./bin/rails", "server"]
