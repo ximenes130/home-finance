@@ -1,0 +1,1 @@
+HomeFinance::VERSION = "v0.0.3"
