@@ -1,6 +1,6 @@
 name: "Home Finance"
 description: "Simple household finance management – track accounts, transactions, categories, and monthly budgets."
-version: "0.0.3"
+version: "0.1.0"
 slug: "home_finance"
 url: "https://github.com/ximenes130/home-finance"
 image: "ghcr.io/ximenes130/home-finance/{arch}"
