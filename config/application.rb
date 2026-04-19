@@ -33,6 +33,7 @@ module HomeFinance
     # /api/hassio_ingress/<token>).  Setting SCRIPT_NAME on the Rack env makes Rails
     # route helpers include that prefix in every generated URL so that navigation
     # links work correctly inside the HA frontend.
+    require_relative "../app/middleware/home_assistant_ingress_middleware"
     config.middleware.use HomeAssistantIngressMiddleware
   end
 end
