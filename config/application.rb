@@ -27,5 +27,12 @@ module HomeFinance
     # Support Home Assistant ingress: the entrypoint sets RAILS_RELATIVE_URL_ROOT
     # to the dynamic ingress path so all generated URLs are correctly prefixed.
     config.relative_url_root = ENV["RAILS_RELATIVE_URL_ROOT"] if ENV["RAILS_RELATIVE_URL_ROOT"].present?
+
+    # When running as a Home Assistant add-on the ingress proxy forwards each request
+    # with an X-Ingress-Path header containing the dynamic path prefix (e.g.
+    # /api/hassio_ingress/<token>).  Setting SCRIPT_NAME on the Rack env makes Rails
+    # route helpers include that prefix in every generated URL so that navigation
+    # links work correctly inside the HA frontend.
+    config.middleware.use HomeAssistantIngressMiddleware
   end
 end
