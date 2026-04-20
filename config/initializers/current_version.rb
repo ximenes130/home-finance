@@ -1,1 +1,1 @@
-HomeFinance::VERSION = "v0.1.3"
+HomeFinance::VERSION = "v0.1.4"
